@@ -1,91 +1,33 @@
-# Module-7
-Mod 7 lab activities
-#Roxana Villagomez
-#Date 3/4/2022
+import pandas as pd
 
-#Problem 1:
+data = pd.read_csv('vertebrate.csv',header='infer')
+data
+data['Class'] = data['Class'].replace(['fishes','birds','amphibians','reptiles'],'non-mammals')
+data
+pd.crosstab([data['Warm-blooded'],data['Gives Birth']],data['Class'])
+from sklearn import tree
 
-import math
+Y = data['Class']
+X = data.drop(['Name','Class'],axis=1)
 
-radius = float(input("Enter the radius of the circle:"))
+clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth=3)
+clf = clf.fit(X, Y)
+import pydotplus 
+from IPython.display import Image
 
-area=math.pi*radius*radius
+dot_data = tree.export_graphviz(clf, feature_names=X.columns, class_names=['mammals','non-mammals'], filled=True, 
+                                out_file=None) 
+graph = pydotplus.graph_from_dot_data(dot_data) 
+Image(graph.create_png())
+testData = [['gila monster',0,0,0,0,1,1,'non-mammals'],
+           ['platypus',1,0,0,0,1,1,'mammals'],
+           ['owl',1,0,0,1,1,0,'non-mammals'],
+           ['dolphin',1,1,1,0,0,0,'mammals']]
+testData = pd.DataFrame(testData, columns=data.columns)
+testData
+testY = testData['Class']
+testX = testData.drop(['Name','Class'],axis=1)
 
-print("Area of the Circle is: {0}".format(area))
-
-
-#Problem 2:
-
-
-number= int(input('Enter a number to check in range(1,10):'))
-
-if number >=1 and number <=10:
-    print('The number is in range(1,10)')
-
-else:
-    print('The number is not in range(1,10)')
-
-#Problem 3:
-
-
-mylist=[5,2,7,-1]
-
-listsum=sum(mylist)
-
-print('\nsum of the list is ',listsum)
-
-#Problem 4:
-
-def my_list(l):
-  x = []
-  for a in l:
-    if a not in x:
-      x.append(a)
-  return x
-
-print(my_list([1, 3, 3, 3, 6, 2, 3, 5]))
-
-#Problem 5:
-
-
-import turtle
-
-def drawSquare(t, sz):
-    for i in range(4):
-        t.forward(sz)
-        t.left(90)
-wn = turtle.Screen()
-alex = turtle.Turtle()
-alex.color('blue')
-side = 20
-width = 10
-for squares in range(5):
-    drawSquare(alex,side)
-    alex.penup()
-    alex.back(width)
-    alex.right(90)
-    alex.forward(width)
-    alex.left(90)
-    alex.pendown()
-    side+=2*width
-wn.exitonclick()
-
-
-#Problem 6:
-
-import turtle
-
-
-def drawFlower(d,p,n):
-    angle=360/n
-    for i in range(p):
-        for count in range(n):
-            turtle.fd(d)
-            turtle.lt(angle)
-        turtle.lt(360/p)
-
-
-drawFlower(100,10,6)
-turtle.getscreen()._root.mainloop()
-
-
+predY = clf.predict(testX)
+predictions = pd.concat([testData['Name'],pd.Series(predY,name='Predicted Class')], axis=1)
+predictions
